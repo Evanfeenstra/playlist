@@ -3,19 +3,22 @@ import './App.css';
 import ReactAudioPlayer from 'react-audio-player'
 import {useDropzone} from 'react-dropzone'
 import {initialize, useDatu} from 'datu'
+import 'firebase/storage'
+import * as firebase from "firebase/app"
 
 const songs = [
-  {name:'Lemon', file:'LEMON.wav'},
-  {name:'Random song', file:'sixer.wav'},
-  {name:'Ukelele', file:'uke.mp3'}
+  {name:'Lemon', file:'/music/LEMON.wav'},
+  {name:'Random song', file:'/music/sixer.wav'},
+  {name:'Ukelele', file:'/music/uke.mp3'}
 ]
 
 function App(){
-  const messages = useDatu()
+  const {messages, send} = useDatu()
   console.log(messages)
+  const allSongs = [...songs, ...messages]
   const [selected,setSelected] = useState('')
   return <div className="App">
-    {songs.map((s,i)=>{
+    {allSongs.map((s,i)=>{
       return <Song key={i} song={s} 
         selected={selected===s.name}
         onSelect={()=> {
@@ -24,15 +27,24 @@ function App(){
       />
     })}
     <div className="upload">
-      <MyDropzone />
+      <MyDropzone send={send} />
     </div>
   </div>
 }
 
-function MyDropzone() {
+function MyDropzone({send}) {
   const onDrop = useCallback(acceptedFiles => {
     // Do something with the files
-    console.log(acceptedFiles)
+    const file = acceptedFiles[0]
+    var storageRef = firebase.storage().ref();
+    var ref = storageRef.child(file.name);
+    ref.put(file).then(function(snapshot) {
+      console.log('Uploaded a blob or file!');
+      send({
+        name: file.name,
+        file: `https://firebasestorage.googleapis.com/v0/b/playlist-2020.appspot.com/o/${file.name}?alt=media`
+      })
+    });
   }, [])
   const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop})
   return (
@@ -58,7 +70,7 @@ function Song(props){
       {song.name}
     </div>
     {selected && <ReactAudioPlayer
-      src={"/music/"+song.file}
+      src={song.file}
       controls
       autoPlay
     />}
