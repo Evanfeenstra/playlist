@@ -2,6 +2,7 @@ import React, {useState, useEffect, useCallback} from 'react';
 import './App.css';
 import ReactAudioPlayer from 'react-audio-player'
 import {useDropzone} from 'react-dropzone'
+import {initialize, useDatu} from 'datu'
 
 const songs = [
   {name:'Lemon', file:'LEMON.wav'},
@@ -10,6 +11,8 @@ const songs = [
 ]
 
 function App(){
+  const messages = useDatu()
+  console.log(messages)
   const [selected,setSelected] = useState('')
   return <div className="App">
     {songs.map((s,i)=>{
@@ -63,3 +66,14 @@ function Song(props){
 }
 
 export default App;
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDoA5XjQ6RtLEKNtXnqINNytOI4n0K0F2o",
+  authDomain: "playlist-2020.firebaseapp.com",
+  databaseURL: "https://playlist-2020.firebaseio.com",
+  projectId: "playlist-2020",
+  storageBucket: "playlist-2020.appspot.com",
+  messagingSenderId: "1061038916785",
+  appId: "1:1061038916785:web:54a3e57bc758c540b24e90"
+};
+initialize(firebaseConfig)
